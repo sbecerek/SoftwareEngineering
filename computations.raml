@@ -1,0 +1,144 @@
+#%RAML 1.0
+title: REST API for Examify
+version: v1
+baseUri: http://examify.org/{version}
+types:
+    User:
+        description: An object representing Teacher,Student or System Admin
+        type: object
+        properties:
+            userId:
+                type: integer
+                description: Given integer ID of the User
+            userPassword:
+                type: string
+                pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$
+                description: Set password of the User
+            email:
+                type: string
+                pattern: ^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$
+                description: Email of the User used for registration
+            token:
+                type: Token
+
+
+    Token:
+        description: An object with token ID
+        type: object
+        properties:
+            token:
+                type: string
+                pattern: ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$
+                description: ID
+        example:
+            token: c8d3ec61-34dc-4cd1-82fe-5b20ab15bebf
+
+    Request:
+        description: !
+            "An object specifing the data for the specific action selected by User"
+        type: object
+        properties:
+            type:
+                type:
+                    enum: [student, notes, exam]
+                description: !
+                    The type of the request sent from the Server to the Front-end application
+            definition:
+                type: any # StudentRequestDefinition | NotesRequestDefinition | ExamRequestDefinition
+                description: !
+                    Definition of request
+        example:
+            type: student
+            definition:
+                [
+                    { id: 0, accepted: true }
+                ]
+            type: notes
+            definition:
+                [
+                    {id: 0, note_body: "Example note"}
+                ]
+            type: exam
+            definition:
+                [
+                    {id: 0, is_starting: true, is_ending: false}
+                ]
+    Status:
+        description: !
+            An object with token ID
+        type: object
+        properties:
+            token:
+                type: Token
+            request:
+                type: Request
+            status:
+                type:
+                    enum: [ accepted, rejected ]
+/request:
+    description: |
+        An endpoint of sending request to the front-end application.
+    post:
+        description: |
+            Accepting requests
+        body:
+            application/json:
+                type: Request
+        responses:
+            201:
+                body:
+                    application/json:
+                        description: !
+                            Request identifier for accessing data
+                        type: Token
+
+/users/{id}:
+    description: |
+        An endpoint for getting the information about User
+    get:
+        description: |
+            Getting User
+        responses:
+            200:
+                body:
+                    application/json:
+                        description: !
+                            User
+                        type: user
+    put:
+        description: |
+            Updating User
+        responses:
+            200:
+                body:
+                    application/json:
+                        description: !
+                            User
+                        type: user
+    delete:
+        description: |
+            Deleting User
+        responses:
+            200:
+                body:
+                    application/json:
+                        description: !
+                            Confirmation (OK)
+                        type: string
+/users/:
+    description: |
+        An endpoint for creating a new User
+    get:
+        description: |
+            Creating new User
+        responses:
+            200:
+                body:
+                    application/json:
+                        description: !
+                            User
+                        type: User
+
+
+
+
